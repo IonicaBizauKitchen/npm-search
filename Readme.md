@@ -16,8 +16,11 @@
   Perform a search with the given `:query` responding with
   an array of packages:
 
+```
+$ GET /popover
+```
+
 ```json
-GET /popover
 [
   {
     "name": "prompt-popover",
@@ -49,8 +52,11 @@ GET /popover
   Optionally you may specify which properties should be
   returned:
 
+```
+$ GET /popover?only=name,description
+```
+
 ```json
-GET /popover?only=name,description
 [
   {
     "name": "prompt-popover",
