@@ -116,7 +116,7 @@ exports.output = function(pkgs){
 
 function link(pkg) {
   var repo = pkg.repository;
-  if (!repo) return;
+  if (!repo || !repo.url) return;
 
   if (~repo.url.indexOf('github')) {
     return githubUrl(repo.url);
