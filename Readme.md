@@ -1,7 +1,7 @@
 
 # npm search
 
-  The npm search server.
+  Full-text npm search server indexed with redis sets.
 
 ## Files
 
