@@ -12,7 +12,7 @@ var request = require('superagent');
  * NPM search remote.
  */
 
-var remote = process.env.NPM_REMOTE || 'http://localhost:3000';
+var remote = process.env.NPM_REMOTE || 'http://165.225.144.103';
 
 /**
  * Index the given `pkg` and invoke `fn(err)`.
