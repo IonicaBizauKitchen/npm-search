@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+
+var search = require('./');
+
+var words = process.argv.slice(2);
+
+search.query(words, function(err, pkgs){
+  if (err) throw err;
+
+  if (!pkgs.length) {
+    console.log('no results');
+    process.exit(0);
+  }
+
+  search.output(pkgs);
+});
+

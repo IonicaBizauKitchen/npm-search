@@ -1,0 +1,90 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var program = require('commander');
+var debug = require('debug')('npm-search');
+var express = require('express');
+var search = require('./');
+var redis = require('redis');
+var only = require('only');
+var db = redis.createClient();
+
+// options
+
+program
+  .option('-p, --port <n>', 'listen on port <n> [3000]', '3000')
+  .parse(process.argv);
+
+// app
+
+var app = express();
+
+// middleware
+
+app.use(express.logger('tiny'));
+app.use(express.responseTime());
+app.use(express.compress());
+
+/*
+ * CORS support.
+ */
+
+app.all('*', function(req, res, next){
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET');
+  res.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+  if ('OPTIONS' == req.method) return res.send(200);
+  next();
+});
+
+/**
+ * GET search results for :query.
+ */
+
+app.get('/:query', function(req, res){
+  // props
+  var only = req.query.only;
+
+  // query
+  var query = req.params.query;
+  debug('query "%s"', query);
+
+  // parse
+  var words = query.split(/\s+/);
+
+  // stats
+  db.incr('stats:queries');
+
+  // search
+  search.queryLocal(words, function(err, pkgs){
+    if (err) {
+      console.error(err.stack);
+      return res.send(500);
+    }
+
+    if (!pkgs) return res.send([]);
+
+    if (only) pkgs = filter(pkgs, only.split(','));
+    res.send(pkgs);
+  })
+});
+
+/**
+ * Filter package `props`.
+ *
+ * @param {Array} pkgs
+ * @param {Array} props
+ * @return {Array} packages with only `props`.
+ */
+
+function filter(pkgs, props) {
+  return pkgs.map(function(pkg){
+    return only(pkg, props);
+  });
+}
+
+app.listen(program.port);
+console.log('listening on port %s', program.port);

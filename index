@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+var http = require('http');
+var jstream = require('jstream');
+var redis = require('redis');
+var search = require('./');
+
+var remote = 'http://registry.npmjs.org/-/all';
+
+var db = redis.createClient();
+
+// flush
+
+db.flushdb();
+
+// fetch packages to prime index
+
+http.get(remote, function(res){
+  var json = jstream('*');
+  console.log('%s', res.statusCode);
+
+  json.on('data', function(pkg){
+    if ('object' != typeof pkg) return;
+    console.log('indexing %s', pkg.name);
+    search.index(pkg);
+  });
+
+  res.pipe(json);
+});
+
